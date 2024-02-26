@@ -4,6 +4,9 @@
 #include <GL/glew.h>
 #include <glut.h>
 #include <GLFW/glfw3.h>
+
+#include <glm/glm.hpp>
+
 // 
 #include <stdio.h>
 #include <iostream>
@@ -55,7 +58,8 @@ int main()
 
     // Создаем контекст OpenGL и привязываем его к окну
     glfwMakeContextCurrent(window);
-
+    glEnable(GL_DEPTH_TEST);
+    
     // Инициализируем GLEW
     GLenum err = glewInit();
     if (GLEW_OK != err) {
@@ -109,10 +113,8 @@ int main()
         glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // Используем нашу шейдерную программу
         glUseProgram(shaderProgram);
 
-        // Рисуем треугольник
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
         // Обновляем другие события, такие как обработка ввода
