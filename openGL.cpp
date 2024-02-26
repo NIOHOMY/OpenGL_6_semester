@@ -1,4 +1,5 @@
-﻿
+﻿#define GLM_ENABLE_EXPERIMENTAL
+
 #include <GL/glew.h>
 #include <glut.h>
 #include <GL/glew.h>
@@ -6,6 +7,9 @@
 #include <GLFW/glfw3.h>
 
 #include <glm/glm.hpp>
+#include<glm/gtc/matrix_transform.hpp>
+#include<glm/gtc/type_ptr.hpp>
+#include<glm/gtx/transform.hpp>
 
 // 
 #include <stdio.h>
@@ -20,11 +24,14 @@ layout (location = 1) in vec3 aColor;
 
 out vec3 color;
 
+uniform mat4 rotation;
+
 void main()
 {
-    gl_Position = vec4(aPos, 1.0);
+    gl_Position = rotation * vec4(aPos, 1.0);
     color = aColor;
 }
+
 )";
 
 const char* fragmentShaderSource = R"(
@@ -68,15 +75,19 @@ int main()
         return 1;
     }
 
+
     // Массив вершин для треугольника
     GLfloat vertices[] = {
        0.0f,  0.5f, 0.0f, // Вершина 
-       0.2f, 0.2f, 0.6f, // Цвет голуб
+       0.8f, 0.2f, 0.8f, // Цвет голуб
       -0.5f, -0.5f, 0.0f, // Вершина 
-       0.2f, 0.2f, 0.6f, // Цвет
+       0.2f, 0.2f, 0.2f, // Цвет
        0.5f, -0.5f, 0.0f, // Вершина 
        0.2f, 0.2f, 0.6f  // Цвет 
     };
+
+    
+
 
     // Создаем буфер вершин и связываем его
     GLuint vertexBuffer;
@@ -94,9 +105,11 @@ int main()
     glCompileShader(fragmentShader);
 
     GLuint shaderProgram = glCreateProgram();
+
     glAttachShader(shaderProgram, vertexShader);
     glAttachShader(shaderProgram, fragmentShader);
     glLinkProgram(shaderProgram);
+
 
     // Связываем атрибуты вершин с буфером вершин
     GLint posAttrib = glGetAttribLocation(shaderProgram, "aPos");
@@ -107,6 +120,8 @@ int main()
     glEnableVertexAttribArray(colAttrib);
     glVertexAttribPointer(colAttrib, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
 
+    
+
     // Основной цикл приложения
     while (!glfwWindowShouldClose(window)) {
         // Очищаем экран
@@ -114,6 +129,14 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glUseProgram(shaderProgram);
+        
+        glm::mat4  model(1.0f);
+        //glm::mat4 rotation = glm::rotate(glm::radians(30.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+
+        model = glm::translate(model, glm::vec3(0.3f, -0.3f, 0.0f));
+        model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+        GLuint rotationLoc = glGetUniformLocation(shaderProgram, "rotation");
+        glUniformMatrix4fv(rotationLoc, 1, GL_FALSE, &model[0][0]);
 
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
