@@ -11,10 +11,12 @@
 #include<glm/gtc/type_ptr.hpp>
 #include<glm/gtx/transform.hpp>
 
+
 // 
 #include <stdio.h>
 #include <iostream>
 
+using glm::perspective;
 
 const char* vertexShaderSource = R"(
 #version 330 core
@@ -24,11 +26,11 @@ layout (location = 1) in vec3 aColor;
 
 out vec3 color;
 
-uniform mat4 rotation;
+uniform mat4 mvp;
 
 void main()
 {
-    gl_Position = rotation * vec4(aPos, 1.0);
+    gl_Position = mvp* vec4(aPos, 1.0);
     color = aColor;
 }
 
@@ -56,7 +58,7 @@ int main()
     }
 
     // Создаем окно
-    GLFWwindow* window = glfwCreateWindow(640, 480, "Hello Triangle", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(800, 600, "Hello Triangle", NULL, NULL);
     if (!window) {
         fprintf(stderr, "ERROR: could not open window with GLFW3\n");
         glfwTerminate();
@@ -78,12 +80,12 @@ int main()
 
     // Массив вершин для треугольника
     GLfloat vertices[] = {
-       0.0f,  0.5f, 0.0f, // Вершина 
-       0.8f, 0.2f, 0.8f, // Цвет голуб
-      -0.5f, -0.5f, 0.0f, // Вершина 
-       0.2f, 0.2f, 0.2f, // Цвет
-       0.5f, -0.5f, 0.0f, // Вершина 
-       0.2f, 0.2f, 0.6f  // Цвет 
+       0.0f,  0.5f, 0.0f, 
+       0.8f, 0.2f, 0.8f, 
+      -0.5f, -0.5f, 0.0f, 
+       0.2f, 0.2f, 0.2f, 
+       0.5f, -0.5f, 0.0f, 
+       0.2f, 0.2f, 0.6f   
     };
 
     
@@ -125,18 +127,30 @@ int main()
     // Основной цикл приложения
     while (!glfwWindowShouldClose(window)) {
         // Очищаем экран
-        glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
+        glClearColor(0.1f, 0.1f, 0.1f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glUseProgram(shaderProgram);
         
-        glm::mat4  model(1.0f);
+        
         //glm::mat4 rotation = glm::rotate(glm::radians(30.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 
-        model = glm::translate(model, glm::vec3(0.3f, -0.3f, 0.0f));
+        /*model = glm::translate(model, glm::vec3(0.3f, -0.3f, 0.0f));
         model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
         GLuint rotationLoc = glGetUniformLocation(shaderProgram, "rotation");
-        glUniformMatrix4fv(rotationLoc, 1, GL_FALSE, &model[0][0]);
+        glUniformMatrix4fv(rotationLoc, 1, GL_FALSE, &model[0][0]);*/
+
+        glm::mat4 projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+        glm::mat4 view = glm::lookAt(
+            glm::vec3(-2.0f, 1.0f, -4.0f),
+            glm::vec3(0.0f, 0.0f, 0.0f),
+            glm::vec3(0.0f, 1.0f, 0.0f));
+        glm::mat4  model(1.0f);
+
+        glm::mat4 mvp = projection * view * model;
+
+        GLuint mvpLoc = glGetUniformLocation(shaderProgram, "mvp");
+        glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, &mvp[0][0]);
 
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
