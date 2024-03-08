@@ -1,147 +1,119 @@
-﻿
-#include <GL/glew.h>
-#include <glut.h>
-#include <GL/glew.h>
-#include <glut.h>
-#include <GLFW/glfw3.h>
-// 
+﻿#include <GL/glew.h>
+#include<GL/glut.h>
+#include <GLFW/glfw3.h> 
 #include <stdio.h>
 #include <iostream>
 
-
-const char* vertexShaderSource = R"(
-#version 330 core
-
-layout (location = 0) in vec3 aPos;
-layout (location = 1) in vec3 aColor;
-
-out vec3 color;
-
-void main()
+#include <soil.h>
+#include "shader_s.h"
+//----------------------------------------------------------------
+float vertices[] = {
+	0.5f,  0.5f,  0.0f,		1.0f,0.0f, 0.0f,		 1.0f, 1.0f,
+	0.5f, -0.5f,  0.0f,		0.0f, 1.0f, 0.0f,		 1.0f, 0.0f,
+	-0.5f, -0.5f,  0.0f,	0.0f, 0.0f,  1.0f,		 0.0f, 0.0f,
+	-0.5f, 0.5f,  0.0f,		1.0f, 1.0f,  0.0f,		 0.0f, 1.0f,
+};
+unsigned int indices[] =
 {
-    gl_Position = vec4(aPos, 1.0);
-    color = aColor;
-}
-)";
-
-const char* fragmentShaderSource = R"(
-#version 330 core
-
-in vec3 color;
-
-out vec4 fragColor;
-
-void main()
-{
-    fragColor = vec4(color, 1.0);
-}
-)";
+	0,1,3,
+	1,2,3
+};
+//----------------------------------------------------------------
 
 int main()
 {
-    // Инициализируем GLFW
-    if (!glfwInit()) {
-        fprintf(stderr, "ERROR: could not start GLFW3\n");
-        return 1;
-    }
+	//----------------------------------------------------------------
+	if (!glfwInit()) {
+		fprintf(stderr, "ERROR: could not start GLFW3\n");
+		return 1;
+	}
 
-    // Создаем окно
-    GLFWwindow* window = glfwCreateWindow(640, 480, "Hello Triangle", NULL, NULL);
-    if (!window) {
-        fprintf(stderr, "ERROR: could not open window with GLFW3\n");
-        glfwTerminate();
-        return 1;
-    }
+	GLFWwindow* window = glfwCreateWindow(640, 480, "Hello Triangle", NULL, NULL);
+	if (!window) {
+		fprintf(stderr, "ERROR: could not open window with GLFW3\n");
+		glfwTerminate();
+		return 1;
+	}
+	glfwMakeContextCurrent(window);
 
-    // Создаем контекст OpenGL и привязываем его к окну
-    glfwMakeContextCurrent(window);
 
-    // Инициализируем GLEW
-    GLenum err = glewInit();
-    if (GLEW_OK != err) {
-        fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
-        glfwTerminate();
-        return 1;
-    }
+	glewExperimental = GL_TRUE;
+	glewInit();
 
-    // Массив вершин для треугольника
-    GLfloat vertices[] = {
-       0.0f,  0.5f, 0.0f, // Вершина 
-       0.2f, 0.2f, 0.6f, // Цвет голуб
-      -0.5f, -0.5f, 0.0f, // Вершина 
-       0.2f, 0.2f, 0.6f, // Цвет
-       0.5f, -0.5f, 0.0f, // Вершина 
-       0.2f, 0.2f, 0.6f  // Цвет 
-    };
 
-    // Создаем буфер вершин и связываем его
-    GLuint vertexBuffer;
-    glGenBuffers(1, &vertexBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	const GLubyte* renderer = glGetString(GL_RENDERER);
+	const GLubyte* version = glGetString(GL_VERSION);
+	printf("Renderer: %s\n", renderer);
+	printf("OpenGL version supported %s\n", version);
 
-    // Создаем шейдерную программу
-    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-    glCompileShader(vertexShader);
 
-    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-    glCompileShader(fragmentShader);
+	//----------------------------------------------------------------
+	GLuint VBO, VAO, EBO;
+	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &VBO);
+	glGenBuffers(1, &EBO);
 
-    GLuint shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
+	glBindVertexArray(VAO);
 
-    // Связываем атрибуты вершин с буфером вершин
-    GLint posAttrib = glGetAttribLocation(shaderProgram, "aPos");
-    glEnableVertexAttribArray(posAttrib);
-    glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    GLint colAttrib = glGetAttribLocation(shaderProgram, "aColor");
-    glEnableVertexAttribArray(colAttrib);
-    glVertexAttribPointer(colAttrib, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-    // Основной цикл приложения
-    while (!glfwWindowShouldClose(window)) {
-        // Очищаем экран
-        glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glEnableVertexAttribArray(2);
 
-        // Используем нашу шейдерную программу
-        glUseProgram(shaderProgram);
+	// textures
+	unsigned int texture;
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
 
-        // Рисуем треугольник
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 
-        // Обновляем другие события, такие как обработка ввода
-        glfwPollEvents();
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-        // Помещаем то, что мы нарисовали, на дисплей
-        glfwSwapBuffers(window);
-    }
+	int width, height, nChannels;
+	unsigned char* data = SOIL_load_image("texture1.png", &width, &height, 0, SOIL_LOAD_RGB);
 
-    // Удаляем буфер вершин и шейдерную программу
-    glDeleteBuffers(1, &vertexBuffer);
-    glDeleteProgram(shaderProgram);
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
+	if (data)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
 
-    // Закрываем окно и завершаем работу GLFW
-    glfwTerminate();
+	}
+	else
+	{
+		std::cout << "texture error\n";
+	}
+	SOIL_free_image_data(data);
 
-    return 0;
+
+	Shader ourShader("vertexshader.vs", "fragmentshader.fs");
+
+	//----------------------------------------------------------------
+
+	while (!glfwWindowShouldClose(window)) {
+
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glBindTexture(GL_TEXTURE_2D, texture);
+
+		ourShader.use();
+		glBindVertexArray(VAO);
+		glEnable(GL_DEPTH_TEST);
+
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+		glfwPollEvents();
+		glfwSwapBuffers(window);
+	}
+
+	//----------------------------------------------------------------
+	return 0;
 }
-
-
-
-//while (!glfwWindowShouldClose(window)) {
-    //    // очищаем экран
-    //    glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
-    //    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    //    // обновить другие события, такие как обработка ввода
-    //    glfwPollEvents();
-    //    // поместите то, что мы рисовали, на дисплей
-    //    glfwSwapBuffers(window);
-    //}
