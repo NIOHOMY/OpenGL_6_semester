@@ -138,7 +138,9 @@
     <None Include="vertexshader.vs" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="rainbow.jpg" />
     <Image Include="texture1.png" />
+    <Image Include="texture2.png" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shader_s.h" />
