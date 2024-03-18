@@ -1,220 +1,269 @@
 ﻿
-#define GLM_ENABLE_EXPERIMENTAL
-#include <GL/glew.h>
-#include<GL/glut.h>
-#include <GLFW/glfw3.h> 
-#include <stdio.h>
+
 #include <iostream>
 
+#include<GL/glew.h>
+#include<gl/glew.h>
+#include<glut.h>
+#include <GLFW/glfw3.h>
+//#include "stb_image.h"
 #include <glm/glm.hpp>
-#include<glm/gtc/matrix_transform.hpp>
-#include<glm/gtc/type_ptr.hpp>
-#include<glm/gtx/transform.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
-
-#include <soil.h>
 #include "shader_s.h"
+#include "camera.h"
+#include <iostream>
+
+void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+void processInput(GLFWwindow* window);
 
 
-static const GLfloat g_vertex_buffer_data[] = {
-			-0.5f,-0.5f,-0.5f, // Треугольник 1 : начало
-			-0.5f,-0.5f, 0.5f,
-			-0.5f, 0.5f, 0.5f, // Треугольник 1 : конец
-			 0.5f, 0.5f,-0.5f, // Треугольник 2 : начало
-			-0.5f,-0.5f,-0.5f,
-			-0.5f, 0.5f,-0.5f, // Треугольник 2 : конец
-			 0.5f,-0.5f, 0.5f,
-			-0.5f,-0.5f,-0.5f,
-			 0.5,-0.5f,-0.5f,
-			 0.5f, 0.5f,-0.5f,
-			 0.5f,-0.5f,-0.5f,
-			-0.5f,-0.5f,-0.5f,
-			-0.5f,-0.5f,-0.5f,
-			-0.5f, 0.5f, 0.5f,
-			-0.5f, 0.5f,-0.5f,
-			 0.5f,-0.5f, 0.5f,
-			-0.5f,-0.5f, 0.5f,
-			-0.5f,-0.5f,-0.5f,
-			-0.5f, 0.5f, 0.5f,
-			-0.5f,-0.5f, 0.5f,
-			 0.5f,-0.5f, 0.5f,
-			 0.5f, 0.5f, 0.5f,
-			 0.5f,-0.5f,-0.5f,
-			 0.5f, 0.5f,-0.5f,
-			 0.5f,-0.5f,-0.5f,
-			 0.5f, 0.5f, 0.5f,
-			 0.5f,-0.5f, 0.5f,
-			 0.5f, 0.5f, 0.5f,
-			 0.5f, 0.5f,-0.5f,
-			-0.5f, 0.5f,-0.5f,
-			 0.5f, 0.5f, 0.5f,
-			-0.5f, 0.5f,-0.5f,
-			-0.5f, 0.5f, 0.5f,
-			 0.5f, 0.5f, 0.5f,
-			-0.5f, 0.5f, 0.5f,
-			 0.5f,-0.5f, 0.5f
-};
+// Константы
+const unsigned int SCR_WIDTH = 600;
+const unsigned int SCR_HEIGHT = 400;
 
-// Цвета для каждой вершины
-static const GLfloat g_color_buffer_data[] = {
-	0.583f,  0.771f,  0.014f,
-	0.609f,  0.115f,  0.436f,
-	0.327f,  0.483f,  0.844f,
-	0.822f,  0.569f,  0.201f,
-	0.435f,  0.602f,  0.223f,
-	0.310f,  0.747f,  0.185f,
-	0.597f,  0.770f,  0.761f,
-	0.559f,  0.436f,  0.730f,
-	0.359f,  0.583f,  0.152f,
-	0.483f,  0.596f,  0.789f,
-	0.559f,  0.861f,  0.639f,
-	0.195f,  0.548f,  0.859f,
-	0.014f,  0.184f,  0.576f,
-	0.771f,  0.328f,  0.970f,
-	0.406f,  0.615f,  0.116f,
-	0.676f,  0.977f,  0.133f,
-	0.971f,  0.572f,  0.833f,
-	0.140f,  0.616f,  0.489f,
-	0.997f,  0.513f,  0.064f,
-	0.945f,  0.719f,  0.592f,
-	0.543f,  0.021f,  0.978f,
-	0.279f,  0.317f,  0.505f,
-	0.167f,  0.620f,  0.077f,
-	0.347f,  0.857f,  0.137f,
-	0.055f,  0.953f,  0.042f,
-	0.714f,  0.505f,  0.345f,
-	0.783f,  0.290f,  0.734f,
-	0.722f,  0.645f,  0.174f,
-	0.302f,  0.455f,  0.848f,
-	0.225f,  0.587f,  0.040f,
-	0.517f,  0.713f,  0.338f,
-	0.053f,  0.959f,  0.120f,
-	0.393f,  0.621f,  0.362f,
-	0.673f,  0.211f,  0.457f,
-	0.820f,  0.883f,  0.371f,
-	0.982f,  0.099f,  0.879f
-};
-//----------------------------------------------------------------
+// Камера
+Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+float lastX = SCR_WIDTH / 2.0f;
+float lastY = SCR_HEIGHT / 2.0f;
+bool firstMouse = true;
+
+// Тайминги
+float deltaTime = 0.0f;
+float lastFrame = 0.0f;
+
+// Освещение
+glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
 int main()
 {
-	//----------------------------------------------------------------
+	// glfw: инициализация и конфигурирование
+//	glfwInit();
 	if (!glfwInit()) {
 		fprintf(stderr, "ERROR: could not start GLFW3\n");
 		return 1;
 	}
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	GLFWwindow* window = glfwCreateWindow(800, 600, "Hello texture", NULL, NULL);
-	if (!window) {
-		fprintf(stderr, "ERROR: could not open window with GLFW3\n");
+
+
+	// glfw: создание окна
+	GLFWwindow* window = glfwCreateWindow(1100, 800, "Hello Cube", nullptr, 0);
+	if (!window)
+	{
+		std::cout << "Failed to create GLFW window" << std::endl;
 		glfwTerminate();
 		return 1;
 	}
 	glfwMakeContextCurrent(window);
 
-
 	glewExperimental = GL_TRUE;
 	glewInit();
+	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+	glfwSetCursorPosCallback(window, mouse_callback);
+	glfwSetScrollCallback(window, scroll_callback);
+
+	// Сообщаем GLFW, чтобы он захватил наш курсор
+	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 
-	const GLubyte* renderer = glGetString(GL_RENDERER);
-	const GLubyte* version = glGetString(GL_VERSION);
-	printf("Renderer: %s\n", renderer);
-	printf("OpenGL version supported %s\n", version);
+	// Конфигурирование глобального состояния OpenGL
+	glEnable(GL_DEPTH_TEST);
 
-	//=================================================================
-	GLuint vertex_array_id;
-	glGenVertexArrays(1, &vertex_array_id);
-	glBindVertexArray(vertex_array_id);
+	// Компилирование нашей шейдерной программы
+	Shader lightingShader("basic_lighting.vs", "basic_lighting.fs");
+	Shader lampShader("lamp.vs", "lamp.fs");
 
-	GLuint vertexbuffer;
-	glGenBuffers(1, &vertexbuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
-	GLuint colorbuffer;
-	glGenBuffers(1, &colorbuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(g_color_buffer_data), g_color_buffer_data, GL_STATIC_DRAW);
+	// Указание вершин (и буфера(ов)) и настройка вершинных атрибутов
+	float vertices[] = {
+			-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+			 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+			 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+			 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+			-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+			-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
 
+			-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+			 0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+			 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+			 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+			-0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+			-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
 
+			-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+			-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+			-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+			-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+			-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+			-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+
+			 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+			 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+			 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+			 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+			 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+			 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+
+			-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+			 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+			 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+			 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+			-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+			-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+
+			-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+			 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+			 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+			 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+			-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+			-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
+	};
+
+	// 1. Настраиваем VAO (и VBO) куба
+	unsigned int VBO, cubeVAO;
+	glGenVertexArrays(1, &cubeVAO);
+	glGenBuffers(1, &VBO);
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+	glBindVertexArray(cubeVAO);
+
+	// Координатные атрибуты
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
+	// Атрибуты нормалей
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
-	glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-	//=================================================================
-	//----------------------------------------------------------------
 
-	/*
-	// textures
-	unsigned int texture;
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
+	// 2. Настраиваем VAO света (VBO остается неизменным; вершины те же и для светового объекта, который также является 3D-кубом)
+	unsigned int lightVAO;
+	glGenVertexArrays(1, &lightVAO);
+	glBindVertexArray(lightVAO);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// Обратите внимание, что мы обновляем шаг атрибута положения лампы, чтобы отразить обновленные данные буфера
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
 
-	int width, height, nChannels;
-	unsigned char* data = SOIL_load_image("rainbow_texture.png", &width, &height, 0, SOIL_LOAD_RGB);
 
-	if (data)
+	// Цикл рендеринга
+	while (!glfwWindowShouldClose(window))
 	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
+		// Логическая часть работы со временем для каждого кадра
+		float currentFrame = glfwGetTime();
+		deltaTime = currentFrame - lastFrame;
+		lastFrame = currentFrame;
 
-	}
-	else
-	{
-		std::cout << "texture error\n";
-	}
-	SOIL_free_image_data(data);
-	*/
+		// Обработка ввода
+		processInput(window);
 
-
-	Shader ourShader("vertexshader.vs", "fragmentshader.fs");
-
-	//----------------------------------------------------------------
-
-	while (!glfwWindowShouldClose(window)) {
-        //================================================================
-		glm::mat4 projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
-		glm::mat4 view = glm::lookAt(
-			glm::vec3(4.0f, 3.0f, -3.0f),
-			glm::vec3(0.0f, 0.0f, 0.0f),
-			glm::vec3(0.0f, 1.0f, 0.0f));
-		glm::mat4  model(1.0f);
-
-		glm::mat4 mvp = projection * view * model;
-
-		GLuint mvpLoc = glGetUniformLocation(ourShader.ID, "mvp");
-		glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, &mvp[0][0]);
-        //================================================================
-		glClearColor(0.2f, 0.2f, 0.2f, 0.0f);
+		// Рендеринг
+		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		//glBindTexture(GL_TEXTURE_2D, texture);
 
+		// Убеждаемся, что активировали шейдер прежде, чем настраивать uniform-переменные/объекты_рисования
+		lightingShader.use();
+		lightingShader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
+		lightingShader.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
+		lightingShader.setVec3("lightPos", lightPos);
 
-		ourShader.use();
-		glBindVertexArray(vertex_array_id);
-		glEnable(GL_DEPTH_TEST);
-		GLuint colorLoc = glGetUniformLocation(ourShader.ID, "inputColor");
+		// Преобразования Вида/Проекции
+		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), 0.4f / 0.3f, 0.1f, 100.0f);
+		glm::mat4 view = camera.GetViewMatrix();
+		lightingShader.setMat4("projection", projection);
+		lightingShader.setMat4("view", view);
 
-		glUniform3f(colorLoc, 1.0f, 0.0f, 0.0f); // Например, красный цвет
+		// Мировое преобразование
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::rotate(model, 30.0f, glm::vec3(0.5f, 1.0f, 0.8f));
+		lightingShader.setMat4("model", model);
 
+		// Рендеринг куба
+		glBindVertexArray(cubeVAO);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
 
+		// Также отрисовываем наш объект-"лампочку" 
+		lampShader.use();
+		lampShader.setMat4("projection", projection);
+		lampShader.setMat4("view", view);
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, lightPos);
+		model = glm::scale(model, glm::vec3(0.2f)); // куб меньшего размера
+		lampShader.setMat4("model", model);
+
+		glBindVertexArray(lightVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 
-
-		glfwPollEvents();
+		// glfw: обмен содержимым front- и back- буферов. Отслеживание событий ввода/вывода (была ли нажата/отпущена кнопка, перемещен курсор мыши и т.п.)
 		glfwSwapBuffers(window);
+		glfwPollEvents();
 	}
 
-	//----------------------------------------------------------------
+	// Опционально: освобождаем все ресурсы, как только они выполнили свое предназначение
+	glDeleteVertexArrays(1, &cubeVAO);
+	glDeleteVertexArrays(1, &lightVAO);
+	glDeleteBuffers(1, &VBO);
+
+	// glfw: завершение, освобождение всех выделенных ранее GLFW-реcурсов
+	glfwTerminate();
 	return 0;
+}
+
+// Обработка всех событий ввода: запрос GLFW о нажатии/отпускании кнопки мыши в данном кадре и соответствующая обработка данных событий
+void processInput(GLFWwindow* window)
+{
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+		glfwSetWindowShouldClose(window, true);
+
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+		camera.ProcessKeyboard(FORWARD, deltaTime);
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+		camera.ProcessKeyboard(BACKWARD, deltaTime);
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+		camera.ProcessKeyboard(LEFT, deltaTime);
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+		camera.ProcessKeyboard(RIGHT, deltaTime);
+}
+
+// glfw: всякий раз, когда изменяются размеры окна (пользователем или операционной системой), вызывается данная callback-функция
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+{
+	// Убеждаемся, что окно просмотра соответствует новым размерам окна.
+	// Обратите внимание, ширина и высота будут значительно больше, чем указано, на Retina-дисплеях
+	glViewport(0, 0, width, height);
+}
+
+
+// glfw: всякий раз, когда перемещается мышь, вызывается данная callback-функция
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+	if (firstMouse)
+	{
+		lastX = xpos;
+		lastY = ypos;
+		firstMouse = false;
+	}
+
+	float xoffset = xpos - lastX;
+	float yoffset = lastY - ypos; // перевернуто, так как y-координаты идут снизу вверх
+
+	lastX = xpos;
+	lastY = ypos;
+
+	camera.ProcessMouseMovement(xoffset, yoffset);
+}
+
+// glfw: всякий раз, когда прокручивается колесико мыши, вызывается данная callback-функция
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+	camera.ProcessMouseScroll(yoffset);
 }
