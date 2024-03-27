@@ -21,8 +21,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="fragmentshader.fs" />
-    <None Include="vertexshader.vs" />
+    <None Include="cubeTextSh.fs">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="cubeTextSh.vs">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shader_s.h">
@@ -37,6 +41,24 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="rainbow_texture.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="cubeTex\back1.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="cubeTex\bottom2.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="cubeTex\front0.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="cubeTex\left4.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="cubeTex\right5.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="cubeTex\top3.jpg">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

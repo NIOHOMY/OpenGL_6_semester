@@ -133,11 +133,17 @@
     <ClCompile Include="openGL.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="fragmentshader.fs" />
+    <None Include="cubeTextSh.fs" />
+    <None Include="cubeTextSh.vs" />
     <None Include="packages.config" />
-    <None Include="vertexshader.vs" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="cubeTex\back1.jpg" />
+    <Image Include="cubeTex\bottom2.jpg" />
+    <Image Include="cubeTex\front0.jpg" />
+    <Image Include="cubeTex\left4.jpg" />
+    <Image Include="cubeTex\right5.jpg" />
+    <Image Include="cubeTex\top3.jpg" />
     <Image Include="rainbow_texture.png" />
     <Image Include="texture1.png" />
   </ItemGroup>
