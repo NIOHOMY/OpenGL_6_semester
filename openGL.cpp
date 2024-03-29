@@ -14,6 +14,7 @@
 #include "shader_s.h"
 #include "camera.h"
 #include <iostream>
+#include <soil.h>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -81,48 +82,51 @@ int main()
 
 	// Указание вершин (и буфера(ов)) и настройка вершинных атрибутов
 	float vertices[] = {
-			-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-			 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-			 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-			 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-			-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-			-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-
-			-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-			 0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-			 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-			 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-			-0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-			-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-
-			-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-			-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-			-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-			-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-			-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-			-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-
-			 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-			 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-			 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-			 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-			 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-			 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-
-			-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-			 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-			 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-			 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-			-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-			-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-
-			-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-			 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-			 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-			 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-			-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-			-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
+		// Первая пирамида
+		// Основание
+		-0.5f, 0.0f, -0.5f,   0.5f, 1.5f,  0.5f,
+		 0.5f, 0.0f, -0.5f,   0.5f, 1.5f,  0.5f,
+		 0.5f, 0.0f,  0.5f,   0.5f, 1.5f,  0.5f,
+		-0.5f, 0.0f, -0.5f,   0.5f, 1.5f,  0.5f,
+		 0.5f, 0.0f,  0.5f,   0.5f, 1.5f,  0.5f,
+		-0.5f, 0.0f,  0.5f,   0.5f, 1.5f,  0.5f,
+		// Боковые грани
+		-0.5f, 0.0f, -0.5f,  -0.5f, 0.7071f, -1.7071f,
+		 0.5f, 0.0f, -0.5f,   1.5f, 0.7071f, -1.7071f,
+		 0.0f, 1.0f,  0.0f,   1.5f, 2.7071f, -1.7071f,
+		-0.5f, 0.0f,  0.5f,  -1.5f, 2.7071f,  1.7071f,
+		 0.5f, 0.0f,  0.5f,   0.5f, 2.7071f,  1.7071f,
+		 0.0f, 1.0f,  0.0f,   0.5f, 0.7071f,  1.7071f,
+		-0.5f, 0.0f, -0.5f,  -0.5f, 0.7071f, -1.7071f,
+		-0.5f, 0.0f,  0.5f,  -1.5f, 0.7071f,  1.7071f,
+		 0.0f, 1.0f,  0.0f,  -1.5f, 2.7071f, -1.7071f,
+		 0.5f, 0.0f, -0.5f,   1.5f, 2.7071f, -1.7071f,
+		 0.5f, 0.0f,  0.5f,   0.5f, 2.7071f,  1.7071f,
+		 0.0f, 1.0f,  0.0f,   0.5f, 0.7071f,  1.7071f,
+		 // Вторая пирамида
+		// Основание
+		-0.5f, 0.0f, -0.5f,   0.5f, -1.5f,  0.5f,
+		 0.5f, 0.0f, -0.5f,   0.5f, -1.5f,  0.5f,
+		 0.5f, 0.0f,  0.5f,   0.5f, -1.5f,  0.5f,
+		-0.5f, 0.0f, -0.5f,   0.5f, -1.5f,  0.5f,
+		 0.5f, 0.0f,  0.5f,   0.5f, -1.5f,  0.5f,
+		-0.5f, 0.0f,  0.5f,   0.5f, -1.5f,  0.5f,
+		// Боковые грани
+		-0.5f, 0.0f, -0.5f,  -0.5f, 0.7071f, -1.7071f,
+		 0.5f, 0.0f, -0.5f,   1.5f, 0.7071f, -1.7071f,
+		 0.0f,-1.0f,  0.0f,   1.5f, 2.7071f, -1.7071f,
+		-0.5f, 0.0f,  0.5f,  -1.5f, 2.7071f,  1.7071f,
+		 0.5f, 0.0f,  0.5f,   0.5f, 2.7071f,  1.7071f,
+		 0.0f,-1.0f,  0.0f,   0.5f, 0.7071f,  1.7071f,
+		-0.5f, 0.0f, -0.5f,  -0.5f, 0.7071f, -1.7071f,
+		-0.5f, 0.0f,  0.5f,  -1.5f, 0.7071f,  1.7071f,
+		 0.0f,-1.0f,  0.0f,  -1.5f, 2.7071f, 1.7071f,
+		 0.5f, 0.0f, -0.5f,   1.5f, 2.7071f, -1.7071f,
+		 0.5f, 0.0f,  0.5f,   0.5f, 2.7071f,  1.7071f,
+		 0.0f, -1.0f,  0.0f,  0.5f, 0.7071f,  1.7071f
 	};
+
+
 
 	// 1. Настраиваем VAO (и VBO) куба
 	unsigned int VBO, cubeVAO;
@@ -153,8 +157,33 @@ int main()
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 
+	//texture
+	unsigned int texture;
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	int width, height, nChannels;
+	unsigned char* data = SOIL_load_image("rainbow_texture.png", &width, &height, &nChannels, SOIL_LOAD_RGB);
+	if (data)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+
+	}
+	else
+	{
+		std::cout << "texture error\n";
+	}
+	SOIL_free_image_data(data);
 
 	// Цикл рендеринга
+	float angle = 50.0f;
 	while (!glfwWindowShouldClose(window))
 	{
 		// Логическая часть работы со временем для каждого кадра
@@ -168,12 +197,17 @@ int main()
 		// Рендеринг
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+		glBindTexture(GL_TEXTURE_2D, texture);
 		// Убеждаемся, что активировали шейдер прежде, чем настраивать uniform-переменные/объекты_рисования
 		lightingShader.use();
-		lightingShader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
-		lightingShader.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
+		//lightingShader.setVec3("objectColor", 0.8f, 0.2f, 0.8f);
+		// Активация текстурного слота
+		glActiveTexture(GL_TEXTURE0);
+		// Привязка текстуры к активному слоту
+		glBindTexture(GL_TEXTURE_2D, texture);
+		lightingShader.setVec3("lightColor", 0.8f, 0.8f, 0.8f);
 		lightingShader.setVec3("lightPos", lightPos);
+		lightingShader.setInt("texture_diffuse1", 0);
 
 		// Преобразования Вида/Проекции
 		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), 0.4f / 0.3f, 0.1f, 100.0f);
@@ -183,7 +217,7 @@ int main()
 
 		// Мировое преобразование
 		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::rotate(model, 30.0f, glm::vec3(0.5f, 1.0f, 0.8f));
+		model = glm::rotate(model, (float)glfwGetTime() * glm::radians(angle), glm::vec3(0.2f, 1.0f, 0.0f));
 		lightingShader.setMat4("model", model);
 
 		// Рендеринг куба

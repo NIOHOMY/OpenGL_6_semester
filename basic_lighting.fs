@@ -6,7 +6,10 @@ in vec3 FragPos;
 
 uniform vec3 lightPos;
 uniform vec3 lightColor;
-uniform vec3 objectColor;
+//uniform vec3 objectColor;
+in vec2 TexCoord;
+
+uniform sampler2D texture_diffuse1;
 
 void main()
 {
@@ -20,6 +23,8 @@ void main()
 	float diff = max(dot(norm, lightDir), 0.0);
 	vec3 diffuse = diff * lightColor;
 
-	vec3 result = (ambient + diffuse) * objectColor;
-	FragColor = vec4(result, 1.0);
+	vec4 texColor = texture(texture_diffuse1, TexCoord);
+	vec3 result = (ambient + diffuse) + texColor.xyz;
+	FragColor = vec4(result, texColor.a);
+
 }
