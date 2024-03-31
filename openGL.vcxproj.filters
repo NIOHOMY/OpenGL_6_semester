@@ -21,8 +21,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="fragmentshader.fs" />
-    <None Include="vertexshader.vs" />
+    <None Include="basic_lighting.fs" />
+    <None Include="basic_lighting.vs" />
+    <None Include="lamp.fs" />
+    <None Include="lamp.vs" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shader_s.h">
@@ -31,12 +33,18 @@
     <ClInclude Include="stb_image.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="texture1.png">
+    <Image Include="CrystalTexture.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="rainbow_texture.png">
+    <Image Include="StandTexture.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="texture1.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
