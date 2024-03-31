@@ -331,7 +331,7 @@ int main()
 
 		// Мировое преобразование
 		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::rotate(model, (float)glfwGetTime() * glm::radians(angle), glm::vec3(0.1f, -0.8f, 0.0f));
+		model = glm::rotate(model, (float)glfwGetTime() * glm::radians(angle+20), glm::vec3(0.1f, -0.8f, -0.1f));
 		lightingShader.setMat4("model", model);
 
 		// Рендеринг куба
@@ -350,7 +350,8 @@ int main()
 		glBindVertexArray(lightVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 		//----------------------------------------------------------------------------------------------------------------
-		lightingShader.setVec3("lightColor", 0.2f, 0.2f, 0.2f);
+		lightingShader.use();
+		lightingShader.setVec3("lightColor", 0.3f, 0.1f, 0.3f);
 		lightingShader.setVec3("lightPos", lightPos);
 		lightingShader.setInt("texture_diffuse1", 0);
 
@@ -359,10 +360,11 @@ int main()
 		lightingShader.setMat4("projection", projection);
 		lightingShader.setMat4("view", view);
 		glm::mat4 secondObjectModel = glm::mat4(1.0f);
+		secondObjectModel = glm::rotate(secondObjectModel, (float)glfwGetTime() * glm::radians(angle-40), glm::vec3(0.0f, -1.0f, 0.0f));
 		lightingShader.setMat4("model", secondObjectModel);
 
 		glBindVertexArray(secondObjectVAO);
-		glDrawArrays(GL_TRIANGLES, 0, 48);
+		glDrawArrays(GL_TRIANGLES, 0, 58);
 
 		// Также отрисовываем наш объект-"лампочку" 
 		lampShader.use();
@@ -374,7 +376,7 @@ int main()
 		lampShader.setMat4("model", secondObjectModel);
 
 		glBindVertexArray(lightVAO);
-		glDrawArrays(GL_TRIANGLES, 0, 48);
+		glDrawArrays(GL_TRIANGLES, 0, 58);
 
 
 		// glfw: обмен содержимым front- и back- буферов. Отслеживание событий ввода/вывода (была ли нажата/отпущена кнопка, перемещен курсор мыши и т.п.)
